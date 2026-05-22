@@ -38,6 +38,8 @@ COPY . .
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
+CMD ["sh", "-c", "php artisan config:clear && php artisan cache:clear && apache2-foreground"]
+
 # Point Apache to Laravel's public folder
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 
