@@ -23,49 +23,64 @@ class AdminStudentController extends Controller {
      * Display a listing of students with filtering, searching, and sorting.
      */
     public function index(Request $request): JsonResponse {
+        // Validate inputs upfront instead of trusting has()/input() blindly
+        $request->validate([
+            'class'         => ['sometimes', 'integer', 'min:1', 'max:12'],
+            'gradeMoreThen' => ['sometimes', 'numeric', 'min:0', 'max:100'],
+            'gradeLessThen' => ['sometimes', 'numeric', 'min:0', 'max:100'],
+            'school_name'   => ['sometimes', 'string', 'max:255'],
+            'search'        => ['sometimes', 'string', 'max:255'],
+            'sort_by'       => ['sometimes', 'string'],
+            'sort_order'    => ['sometimes', 'in:asc,desc'],
+            'per_page'      => ['sometimes', 'integer', 'min:1', 'max:100'],
+        ]);
+
         $query = Student::query();
 
-
         // Filter by class
-        if ($request->has('class')) {
+        if ($request->filled('class')) {
             $query->where('class', $request->input('class'));
         }
 
-        // Filter by grade
-        if ($request->has('grade')) {
-            $query->where('grade', $request->input('grade'));
+        // Filter by grade range
+        if ($request->filled('gradeMoreThen')) {
+            $query->where('grade', '>=', $request->input('gradeMoreThen'));
+        }
+        if ($request->filled('gradeLessThen')) {
+            $query->where('grade', '<=', $request->input('gradeLessThen'));
         }
 
         // Filter by school name
-        if ($request->has('school_name')) {
+        if ($request->filled('school_name')) {
             $query->where('school_name', 'like', '%' . $request->input('school_name') . '%');
         }
 
-        // Search by name or school name
-        if ($request->has('search')) {
+        // Search across name fields and school name
+        if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->where('first_name', 'like', '%' . $search . '%')
-                    ->orWhere('last_name', 'like', '%' . $search . '%')
+                $q->where('first_name',  'like', '%' . $search . '%')
+                    ->orWhere('second_name', 'like', '%' . $search . '%')
+                    ->orWhere('third_name',  'like', '%' . $search . '%')
+                    ->orWhere('last_name',   'like', '%' . $search . '%')
                     ->orWhere('school_name', 'like', '%' . $search . '%');
             });
         }
 
-        // Sort
-        $sortBy = $request->input('sort_by', 'created_at');
-        $sortOrder = $request->input('sort_order', 'desc');
+        // Sort — whitelist prevents SQL injection through sort parameters
+        $allowed  = ['class', 'grade', 'created_at', 'first_name', 'last_name'];
+        $sortBy    = in_array($request->input('sort_by'), $allowed)
+            ? $request->input('sort_by')
+            : 'created_at';
+        $sortOrder = $request->input('sort_order', 'desc'); // already validated above
 
-        if (in_array($sortBy, ['class', 'grade', 'created_at', 'first_name', 'last_name'])) {
-            $query->orderBy($sortBy, in_array($sortOrder, ['asc', 'desc']) ? $sortOrder : 'desc');
-        }
+        $query->orderBy($sortBy, $sortOrder);
 
-        // Paginate
-        $per_page = $request->input('per_page', 50);
-        $students = $query->paginate($per_page);
+        // Paginate — cap at 100 rows per page to protect the DB
+        $students = $query->paginate($request->input('per_page', 50));
 
         return response()->json($students);
     }
-
     /**
      * Display the specified student.
      */
