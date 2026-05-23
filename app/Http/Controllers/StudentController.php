@@ -15,7 +15,7 @@ class StudentController extends Controller {
      * Store a newly created student record from public form submission.
      */
     public function store(StoreStudentRequest $request): JsonResponse {
-        $validated = $request->validated([
+        $validated = $request->validate([
             'first_name' => ['required', 'string', 'max:255'],
             'second_name' => ['required', 'string', 'max:255'],
             'third_name' => ['required', 'string', 'max:255'],
