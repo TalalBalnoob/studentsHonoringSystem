@@ -25,7 +25,7 @@ class StoreStudentRequest extends FormRequest {
             'third_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'gender' => ['required', 'in:male,female'],
-            'governorate' => ['required', 'string', 'max:255'],
+            'governorate' => ['required', 'integer', 'min:1', 'max:12'],
             'class' => ['required', 'integer', 'min:1', 'max:12'],
             'school_name' => ['required', 'string', 'max:255'],
             'grade' => ['required', 'numeric', 'min:0', 'max:100'],

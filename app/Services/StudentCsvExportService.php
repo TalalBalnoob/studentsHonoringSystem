@@ -23,6 +23,8 @@ class StudentCsvExportService {
                 throw new \RuntimeException('Unable to open php://output for writing');
             }
 
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
             // Write headers
             fputcsv($file, [
                 'ID',

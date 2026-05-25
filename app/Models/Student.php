@@ -32,7 +32,7 @@ class Student extends Model {
 	 */
 	protected $casts = [
 		'custom_data' => 'array',
-		'grade' => 'integer',
+		'grade' => 'decimal:2',
 		'class' => 'integer',
 	];
 }

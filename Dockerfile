@@ -38,8 +38,6 @@ COPY . .
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-CMD ["sh", "-c", "php artisan config:clear && php artisan cache:clear && apache2-foreground"]
-
 # Point Apache to Laravel's public folder
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 
@@ -60,4 +58,7 @@ RUN echo 'Listen ${PORT}' > /etc/apache2/ports.conf \
 
 EXPOSE 8080
 
-CMD ["apache2-foreground"]
+
+CMD ["sh", "-c", "php artisan config:clear && php artisan cache:clear && apache2-foreground"]
+
+# CMD ["apache2-foreground"]
