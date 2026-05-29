@@ -39,11 +39,15 @@ class StudentRepository {
             });
         }
 
-        foreach ($query as $student) {
-            $student['governorate'] = Governorate::getName($student->governorate);
+        $paginated = $query->orderBy($sortBy, $sortOrder)->paginate($perPage);
+
+        foreach ($paginated as $student) {
+            if (is_int($student->governorate)) {
+                $student->governorate = Governorate::getName($student->governorate);
+            }
         }
 
-        return $query->orderBy($sortBy, $sortOrder)->paginate($perPage);
+        return $paginated;
     }
 
     public function delete(Student $student): void {
