@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AddImage;
 use App\Repositories\StudentRepository;
 
 class StudentsService
@@ -49,11 +50,27 @@ class StudentsService
         if (isset($data['qiyes_cert_image'])) {
             $data['qiyes_cert_image'] = $this->storageService->uploadCertificate($data['qiyes_cert_image']);
         }
-        if (isset($data['other_cert_image'])) {
-            $data['other_cert_image'] = $this->storageService->uploadCertificate($data['other_cert_image']);
+
+        // Extract and remove additional_images before saving the student
+        $additionalImages = $data['additional_images'] ?? null;
+        if (isset($data['additional_images'])) {
+            unset($data['additional_images']);
         }
 
-        return $this->studentRepository->create($data);
+        $student = $this->studentRepository->create($data);
+
+        // Save additional images to add_images table
+        if ($additionalImages && is_array($additionalImages)) {
+            foreach ($additionalImages as $image) {
+                $imagePath = $this->storageService->uploadCertificate($image);
+                AddImage::create([
+                    'student_id' => $student->id,
+                    'image_path' => $imagePath,
+                ]);
+            }
+        }
+
+        return $student;
     }
 
     public function updateStudent(int $id, array $data)
@@ -88,15 +105,26 @@ class StudentsService
             $data['qiyes_cert_image'] = $this->storageService->uploadCertificate($data['qiyes_cert_image']);
         }
 
-        // Handle other certificate image update
-        if (isset($data['other_cert_image'])) {
-            if ($student->other_cert_image) {
-                $this->storageService->deleteCertificate($student->other_cert_image);
-            }
-            $data['other_cert_image'] = $this->storageService->uploadCertificate($data['other_cert_image']);
+        // Extract and remove additional_images before updating the student
+        $additionalImages = $data['additional_images'] ?? null;
+        if (isset($data['additional_images'])) {
+            unset($data['additional_images']);
         }
 
-        return $this->studentRepository->update($student, $data);
+        $updatedStudent = $this->studentRepository->update($student, $data);
+
+        // Save new additional images to add_images table
+        if ($additionalImages && is_array($additionalImages)) {
+            foreach ($additionalImages as $image) {
+                $imagePath = $this->storageService->uploadCertificate($image);
+                AddImage::create([
+                    'student_id' => $student->id,
+                    'image_path' => $imagePath,
+                ]);
+            }
+        }
+
+        return $updatedStudent;
     }
 
     public function deleteStudent(int $id)
@@ -117,8 +145,14 @@ class StudentsService
         if ($student->qiyes_cert_image) {
             $this->storageService->deleteCertificate($student->qiyes_cert_image);
         }
-        if ($student->other_cert_image) {
-            $this->storageService->deleteCertificate($student->other_cert_image);
+
+        // Delete all additional images from storage and database
+        $additionalImages = $student->additionalImages;
+        foreach ($additionalImages as $addImage) {
+            if ($addImage->image_path) {
+                $this->storageService->deleteCertificate($addImage->image_path);
+            }
+            $addImage->delete();
         }
 
         return $this->studentRepository->delete($student);

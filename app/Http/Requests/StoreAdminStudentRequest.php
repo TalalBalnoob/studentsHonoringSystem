@@ -40,7 +40,8 @@ class StoreAdminStudentRequest extends FormRequest
             'SAAT_grade' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'SAAT_cert_image' => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,gif', 'max:51200'],
             'qiyes_cert_image' => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,gif', 'max:51200'],
-            'other_cert_image' => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,gif', 'max:51200'],
+            'additional_images' => ['nullable', 'array'],
+            'additional_images.*' => ['file', 'image', 'mimes:jpeg,png,jpg,gif', 'max:51200'],
         ];
     }
 }

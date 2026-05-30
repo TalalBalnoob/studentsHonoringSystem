@@ -5,6 +5,7 @@ namespace App\Models;
 use Database\Factories\StudentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Student extends Model
 {
@@ -32,7 +33,6 @@ class Student extends Model
         'SAAT_grade',
         'SAAT_cert_image',
         'qiyes_cert_image',
-        'other_cert_image',
     ];
 
     /**
@@ -44,4 +44,9 @@ class Student extends Model
         'SAAT_grade' => 'decimal:2',
         'class' => 'integer',
     ];
+
+    public function additionalImages(): HasMany
+    {
+        return $this->hasMany(AddImage::class);
+    }
 }

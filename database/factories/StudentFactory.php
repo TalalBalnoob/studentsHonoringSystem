@@ -38,7 +38,6 @@ class StudentFactory extends Factory
             'SAAT_grade' => $this->faker->numberBetween(0, 100),
             'SAAT_cert_image' => null,
             'qiyes_cert_image' => null,
-            'other_cert_image' => null,
         ];
     }
 }
