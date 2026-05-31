@@ -32,30 +32,55 @@ class StudentCsvExportService {
                 'Second Name',
                 'Third Name',
                 'Last Name',
+                'phone1',
+                'phone2',
+                'address',
                 'Gender',
                 'Governorate',
                 'Class',
                 'School Name',
                 'Grade',
+                'certificate_image',
+                'Qiyes_grade',
+                'SAAT_grade',
+                'SAAT_cert_image',
+                'Qiyes_cert_image',
+                'additional_cert_image',
                 'Created At',
                 'Updated At',
             ]);
 
-            // Write student data
-            $query->chunk(100, function ($students) use ($file) {
+            // Write student data (eager-load additional images)
+            $query->with('additionalImages')->chunk(100, function ($students) use ($file) {
                 foreach ($students as $student) {
+                    // Build additional image links array
+                    $additionalLinks = $student->additionalImages->map(function ($img) {
+                        return 'https://vpkxfiywlhsdowqosuqi.supabase.co/storage/v1/object/public/certificates/' . $img->image_path;
+                    })->values()->toArray();
+
                     fputcsv($file, [
                         $student->id,
                         $student->first_name,
                         $student->second_name,
                         $student->third_name,
                         $student->last_name,
+                        $student->phone1,
+                        $student->phone2,
+                        $student->address,
                         $student->gender,
                         // Convert governorate code to name
                         Governorate::getName($student->governorate),
                         $student->class,
                         $student->school_name,
                         $student->grade,
+                        $student->cert_image ? 'https://vpkxfiywlhsdowqosuqi.supabase.co/storage/v1/object/public/certificates/' . $student->cert_image : null,
+                        $student->qiyes_grade,
+                        $student->SAAT_grade,
+                        $student->SAAT_cert_image ? 'https://vpkxfiywlhsdowqosuqi.supabase.co/storage/v1/object/public/certificates/' . $student->SAAT_cert_image : null,
+                        $student->qiyes_cert_image ? 'https://vpkxfiywlhsdowqosuqi.supabase.co/storage/v1/object/public/certificates/' . $student->qiyes_cert_image : null,
+                        // JSON-encode the array of additional cert image links
+                        json_encode($additionalLinks, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+
                         $student->created_at,
                         $student->updated_at,
                     ]);

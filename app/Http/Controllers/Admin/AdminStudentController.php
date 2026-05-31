@@ -25,6 +25,7 @@ class AdminStudentController extends Controller {
         // Validate inputs upfront instead of trusting has()/input() blindly
         $validated = $request->validate([
             'class'         => ['sometimes', 'integer', 'min:1', 'max:12'],
+            'gender'        => ['sometimes', 'in:male,female'],
             'gradeMoreThen' => ['sometimes', 'numeric', 'min:0', 'max:100'],
             'gradeLessThen' => ['sometimes', 'numeric', 'min:0', 'max:100'],
             'school_name'   => ['sometimes', 'string', 'max:255'],

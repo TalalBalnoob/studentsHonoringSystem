@@ -26,6 +26,12 @@ class CertificateStorageService {
         return $filename;
     }
 
+    public function uploadCertificateContent(string $content, string $filename): string {
+        $path = Str::uuid() . '.' . pathinfo($filename, PATHINFO_EXTENSION);
+        Storage::disk('supabase')->put($path, $content);
+        return $path;
+    }
+
     /**
      * Get signed URL for certificate.
      */

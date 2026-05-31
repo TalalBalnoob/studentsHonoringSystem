@@ -7,14 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Student extends Model
-{
-    /** @use HasFactory<StudentFactory> */
+class Student extends Model {
     use HasFactory;
 
-    /**
-     * @var array<string, string>
-     */
     protected $fillable = [
         'first_name',
         'second_name',
@@ -35,9 +30,6 @@ class Student extends Model
         'qiyes_cert_image',
     ];
 
-    /**
-     * @var array<string, string>
-     */
     protected $casts = [
         'grade' => 'decimal:2',
         'qiyes_grade' => 'decimal:2',
@@ -45,8 +37,7 @@ class Student extends Model
         'class' => 'integer',
     ];
 
-    public function additionalImages(): HasMany
-    {
+    public function additionalImages(): HasMany {
         return $this->hasMany(AddImage::class);
     }
 }

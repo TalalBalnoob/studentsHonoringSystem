@@ -7,7 +7,15 @@ use App\Models\Student;
 
 class StudentRepository {
     public function getFiltered(array $filters, string $sortBy, string $sortOrder, int $perPage) {
-        $query = Student::query();
+        $query = Student::query()->with('additionalImages');
+
+        if (! empty($filters['gender'])) {
+            $query->where('gender', $filters['gender']);
+        }
+
+        if (isset($filters['governorate']) && is_numeric($filters['governorate'])) {
+            $query->where('governorate', $filters['governorate']);
+        }
 
         // Filter by class
         if (! empty($filters['class'])) {
@@ -41,11 +49,10 @@ class StudentRepository {
 
         $paginated = $query->orderBy($sortBy, $sortOrder)->paginate($perPage);
 
-        foreach ($paginated as $student) {
-            if (is_int($student->governorate)) {
-                $student->governorate = Governorate::getName($student->governorate);
-            }
-        }
+        $paginated->getCollection()->transform(function ($student) {
+            $student->governorate = Governorate::getName($student->governorate);
+            return $student;
+        });
 
         return $paginated;
     }
@@ -64,6 +71,6 @@ class StudentRepository {
     }
 
     public function findOrFail(int $id): Student {
-        return Student::findOrFail($id);
+        return Student::with('additionalImages')->findOrFail($id);
     }
 }
