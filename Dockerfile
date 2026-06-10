@@ -25,8 +25,8 @@ RUN docker-php-ext-install \
     gd
 
 # Enable Apache mod_rewrite (required for Laravel routing)
-RUN a2enmod rewrite
-RUN a2enmod rewrite headers
+RUN a2dismod mpm_event mpm_worker 2>/dev/null || true \
+    && a2enmod mpm_prefork rewrite headers
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
