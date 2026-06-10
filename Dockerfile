@@ -25,7 +25,7 @@ RUN docker-php-ext-install \
     gd
 
 # Enable Apache mod_rewrite (required for Laravel routing)
-RUN a2dismod rewrite
+RUN a2enmod rewrite
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -38,14 +38,13 @@ COPY . .
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Point Apache to Laravel's public folder
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-
-RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf \
-    && sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/apache2.conf
-
-# Allow .htaccess overrides (needed for Laravel routing)
-RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+RUN printf '<VirtualHost *:${PORT}>\n\
+    DocumentRoot /var/www/html/public\n\
+    <Directory /var/www/html/public>\n\
+    AllowOverride All\n\
+    Require all granted\n\
+    </Directory>\n\
+    </VirtualHost>\n' > /etc/apache2/sites-available/000-default.conf
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
