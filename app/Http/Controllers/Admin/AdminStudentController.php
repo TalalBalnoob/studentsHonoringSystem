@@ -30,6 +30,7 @@ class AdminStudentController extends Controller {
             'gradeLessThen' => ['sometimes', 'numeric', 'min:0', 'max:100'],
             'school_name'   => ['sometimes', 'string', 'max:255'],
             'search'        => ['sometimes', 'string', 'max:255'],
+            'gavernorate'    => ['sometimes', 'integer', 'min:1', 'max:12'],
             'sort_by'       => ['sometimes', 'string'],
             'sort_order'    => ['sometimes', 'in:asc,desc'],
             'per_page'      => ['sometimes', 'integer', 'min:1', 'max:100'],
