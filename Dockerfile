@@ -44,6 +44,7 @@ RUN printf '<VirtualHost *:${PORT}>\n\
     AllowOverride All\n\
     Require all granted\n\
     </Directory>\n\
+    SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1\n\
     </VirtualHost>\n' > /etc/apache2/sites-available/000-default.conf
 
 # Set permissions
